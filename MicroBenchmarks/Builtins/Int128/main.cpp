@@ -36,7 +36,6 @@ public:
         double trade_count_d = _trade_count;
         IntSqT sum_pow_2 = _sum_trade_size;
         sum_pow_2 *= sum_pow_2;
-        std::div(sum_pow_2, _trade_count);
         IntSqT sum_pow_2_whole = (sum_pow_2 / _trade_count);
         double sum_pow_2_decimal = (sum_pow_2 - sum_pow_2_whole * _trade_count) / trade_count_d;
         return (_sum_sq_trade_size - sum_pow_2_whole - sum_pow_2_decimal) / trade_count_d;
