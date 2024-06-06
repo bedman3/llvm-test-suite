@@ -137,8 +137,8 @@ void BM_DivideIntrinsic128UniformDivisor(benchmark::State& state) {
     i = (i + 1) % kSampleSize;
   }
 }
-BENCHMARK_TEMPLATE(BM_DivideIntrinsic128UniformDivisor, __uint128_t);
-BENCHMARK_TEMPLATE(BM_DivideIntrinsic128UniformDivisor, __int128_t);
+// BENCHMARK_TEMPLATE(BM_DivideIntrinsic128UniformDivisor, __uint128_t);
+// BENCHMARK_TEMPLATE(BM_DivideIntrinsic128UniformDivisor, __int128_t);
 
 template <typename T>
 void BM_RemainderIntrinsic128UniformDivisor(benchmark::State& state) {
@@ -149,8 +149,8 @@ void BM_RemainderIntrinsic128UniformDivisor(benchmark::State& state) {
     i = (i + 1) % kSampleSize;
   }
 }
-BENCHMARK_TEMPLATE(BM_RemainderIntrinsic128UniformDivisor, __uint128_t);
-BENCHMARK_TEMPLATE(BM_RemainderIntrinsic128UniformDivisor, __int128_t);
+// BENCHMARK_TEMPLATE(BM_RemainderIntrinsic128UniformDivisor, __uint128_t);
+// BENCHMARK_TEMPLATE(BM_RemainderIntrinsic128UniformDivisor, __int128_t);
 
 // Generates random pairs of (a, b) where a >= b, a is 128-bit and
 // b is 64-bit.
@@ -223,19 +223,17 @@ void BM_IntegerAggregatorUpdate(benchmark::State& state) {
 BENCHMARK_TEMPLATE(BM_IntegerAggregatorUpdate, __uint128_t);
 
 template <typename T>
-void BM_IntegerAggregatorGetVariance(benchmark::State& state) {
+void BM_IntegerAggregatorUpdateAndGetVariance(benchmark::State& state) {
   auto values = GetRandomIntrinsic128SampleSmallDivisor<T>();
   size_t i = 0;
   integer_trade_size_variance<uint64_t, T> aggregator;
-  for (auto& pairs : values) {
-    aggregator.on_trade_update(pairs.first);
-  }
   for (const auto _ : state) {
+    aggregator.on_trade_update(values[i].second);
     benchmark::DoNotOptimize(aggregator.get_variance());
     i = (i + 1) % kSampleSize;
   }
 }
-BENCHMARK_TEMPLATE(BM_IntegerAggregatorGetVariance, __uint128_t);
+BENCHMARK_TEMPLATE(BM_IntegerAggregatorUpdateAndGetVariance, __uint128_t);
 
 void BM_FloatingPointAggregatorUpdate(benchmark::State& state) {
   auto values = GetRandomIntrinsic128SampleSmallDivisor<__uint128_t>();
@@ -253,7 +251,7 @@ void BM_FloatingPointAggregatorUpdate(benchmark::State& state) {
 }
 BENCHMARK(BM_FloatingPointAggregatorUpdate);
 
-void BM_FloatingPointAggregatorGetVariance(benchmark::State& state) {
+void BM_FloatingPointAggregatorUpdateAndGetVariance(benchmark::State& state) {
   auto values = GetRandomIntrinsic128SampleSmallDivisor<__uint128_t>();
   auto double_array = std::vector<double>();
   fp_variance<double> aggregator;
@@ -267,7 +265,7 @@ void BM_FloatingPointAggregatorGetVariance(benchmark::State& state) {
     i = (i + 1) % kSampleSize;
   }
 }
-BENCHMARK(BM_FloatingPointAggregatorGetVariance);
+BENCHMARK(BM_FloatingPointAggregatorUpdateAndGetVariance);
 
 template <typename T>
 void BM_BaseCase(benchmark::State& state) {
