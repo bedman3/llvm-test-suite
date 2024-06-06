@@ -172,7 +172,7 @@ void BM_IntegerAggregatorUpdate(benchmark::State& state) {
   size_t i = 0;
   integer_trade_size_variance<uint64_t, T> aggregator;
   for (const auto _ : state) {
-    benchmark::DoNotOptimize(aggregator.on_trade_update(values[i].second));
+    aggregator.on_trade_update(values[i].second)
     i = (i + 1) % kSampleSize;
   }
 }
@@ -190,6 +190,16 @@ void BM_IntegerAggregatorGetVariance(benchmark::State& state) {
   }
 }
 BENCHMARK_TEMPLATE(BM_IntegerAggregatorGetVariance, __uint128_t);
+
+template <typename T>
+void BM_BaseCase(benchmark::State& state) {
+  auto values = GetRandomIntrinsic128SampleSmallDivisor<T>();
+  size_t i = 0;
+  for (const auto _ : state) {
+    i = (i + 1) % kSampleSize;
+  }
+}
+BENCHMARK_TEMPLATE(BM_BaseCase, __uint128_t);
 
 }
 
