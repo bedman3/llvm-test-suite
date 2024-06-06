@@ -227,8 +227,10 @@ void BM_IntegerAggregatorGetVariance(benchmark::State& state) {
   auto values = GetRandomIntrinsic128SampleSmallDivisor<T>();
   size_t i = 0;
   integer_trade_size_variance<uint64_t, T> aggregator;
+  for (auto& pairs : values) {
+    aggregator.on_trade_update(pairs.first);
+  }
   for (const auto _ : state) {
-    aggregator.on_trade_update(values[i].second);
     benchmark::DoNotOptimize(aggregator.get_variance());
     i = (i + 1) % kSampleSize;
   }
