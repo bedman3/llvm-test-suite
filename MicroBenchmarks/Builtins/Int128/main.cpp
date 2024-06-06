@@ -253,11 +253,12 @@ void BM_FloatingPointAggregatorGetVariance(benchmark::State& state) {
   auto double_array = std::vector<double>();
   for (auto& pair : values) {
     double_array.push_back((double)pair.first);
+    aggregator.on_update((double)pair.first);
   }
   size_t i = 0;
   fp_variance<double> aggregator;
   for (const auto _ : state) {
-    aggregator.on_update(double_array[i]);
+    
     benchmark::DoNotOptimize(aggregator.get_variance());
     i = (i + 1) % kSampleSize;
   }
