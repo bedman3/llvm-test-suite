@@ -51,10 +51,10 @@ public:
 
 template <typename FloatT>
 class fp_variance {
+public:
     uint64_t _input_count;
     FloatT _mean;
     FloatT _second_order_stats;
-public:
     fp_variance() {
         reset();
     }
@@ -245,6 +245,9 @@ void BM_FloatingPointAggregatorUpdate(benchmark::State& state) {
   fp_variance<double> aggregator;
   for (const auto _ : state) {
     aggregator.on_update(double_array[i]);
+    benchmark::DoNotOptimize(aggregator._input_count);
+    benchmark::DoNotOptimize(aggregator._mean);
+    benchmark::DoNotOptimize(aggregator._second_order_stats);
     i = (i + 1) % kSampleSize;
   }
   benchmark::DoNotOptimize(aggregator.get_variance());
@@ -257,10 +260,10 @@ void BM_FloatingPointAggregatorUpdateAndGetVariance(benchmark::State& state) {
   fp_variance<double> aggregator;
   for (auto& pair : values) {
     double_array.push_back((double)pair.first);
-    aggregator.on_update((double)pair.first);
   }
   size_t i = 0;
   for (const auto _ : state) {
+    aggregator.on_update(double_array[i]);
     benchmark::DoNotOptimize(aggregator.get_variance());
     i = (i + 1) % kSampleSize;
   }
