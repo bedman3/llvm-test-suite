@@ -155,7 +155,7 @@ BENCHMARK_TEMPLATE(BM_RemainderIntrinsic128SmallDivisor, __uint128_t);
 BENCHMARK_TEMPLATE(BM_RemainderIntrinsic128SmallDivisor, __int128_t);
 
 template <typename T>
-void BM_128IntegerToDOubleConversion(benchmark::State& state) {
+void BM_128IntegerToDoubleConversion(benchmark::State& state) {
   auto values = GetRandomIntrinsic128SampleSmallDivisor<T>();
   size_t i = 0;
   for (const auto _ : state) {
@@ -163,8 +163,8 @@ void BM_128IntegerToDOubleConversion(benchmark::State& state) {
     i = (i + 1) % kSampleSize;
   }
 }
-BENCHMARK_TEMPLATE(BM_128IntegerToDOubleConversion, __uint128_t);
-BENCHMARK_TEMPLATE(BM_128IntegerToDOubleConversion, __int128_t);
+BENCHMARK_TEMPLATE(BM_128IntegerToDoubleConversion, __uint128_t);
+BENCHMARK_TEMPLATE(BM_128IntegerToDoubleConversion, __int128_t);
 
 template <typename T>
 void BM_IntegerAggregatorUpdate(benchmark::State& state) {
@@ -172,9 +172,11 @@ void BM_IntegerAggregatorUpdate(benchmark::State& state) {
   size_t i = 0;
   integer_trade_size_variance<uint64_t, T> aggregator;
   for (const auto _ : state) {
-    aggregator.on_trade_update(values[i].second);
+    benchmark::DoNotOptimize(values[i].second);
+    aggregator.on_trade_update();
     i = (i + 1) % kSampleSize;
   }
+  benchmark::DoNotOptimize(aggregator.get_variance());
 }
 BENCHMARK_TEMPLATE(BM_IntegerAggregatorUpdate, __uint128_t);
 
