@@ -229,6 +229,9 @@ void BM_IntegerAggregatorUpdateAndGetVariance(benchmark::State& state) {
   integer_trade_size_variance<uint64_t, T> aggregator;
   for (const auto _ : state) {
     aggregator.on_trade_update(values[i].second);
+    benchmark::DoNotOptimize(aggregator._sum_trade_size);
+    benchmark::DoNotOptimize(aggregator._trade_count);
+    benchmark::DoNotOptimize(aggregator._sum_sq_trade_size);
     benchmark::DoNotOptimize(aggregator.get_variance());
     i = (i + 1) % kSampleSize;
   }
@@ -257,13 +260,16 @@ BENCHMARK(BM_FloatingPointAggregatorUpdate);
 void BM_FloatingPointAggregatorUpdateAndGetVariance(benchmark::State& state) {
   auto values = GetRandomIntrinsic128SampleSmallDivisor<__uint128_t>();
   auto double_array = std::vector<double>();
-  fp_variance<double> aggregator;
   for (auto& pair : values) {
     double_array.push_back((double)pair.first);
   }
   size_t i = 0;
+  fp_variance<double> aggregator;
   for (const auto _ : state) {
     aggregator.on_update(double_array[i]);
+    benchmark::DoNotOptimize(aggregator._input_count);
+    benchmark::DoNotOptimize(aggregator._mean);
+    benchmark::DoNotOptimize(aggregator._second_order_stats);
     benchmark::DoNotOptimize(aggregator.get_variance());
     i = (i + 1) % kSampleSize;
   }
