@@ -172,7 +172,7 @@ void BM_IntegerAggregatorUpdate(benchmark::State& state) {
   size_t i = 0;
   integer_trade_size_variance aggregator;
   for (const auto _ : state) {
-    benchmark::DoNotOptimize(aggregator.on_trade_update(values.second));
+    benchmark::DoNotOptimize(aggregator.on_trade_update(values[i].second));
     i = (i + 1) % kSampleSize;
   }
 }
@@ -184,7 +184,7 @@ void BM_IntegerAggregatorGetVariance(benchmark::State& state) {
   size_t i = 0;
   integer_trade_size_variance<uint64_t, T> aggregator;
   for (const auto _ : state) {
-    aggregator.on_trade_update(values.second);
+    aggregator.on_trade_update(values[i].second);
     benchmark::DoNotOptimize(aggregator.get_variance());
     i = (i + 1) % kSampleSize;
   }
