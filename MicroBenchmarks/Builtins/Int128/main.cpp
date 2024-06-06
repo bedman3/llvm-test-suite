@@ -234,7 +234,7 @@ BENCHMARK_TEMPLATE(BM_IntegerAggregatorGetVariance, __uint128_t);
 
 void BM_FloatingPointAggregatorUpdate(benchmark::State& state) {
   auto values = GetRandomIntrinsic128SampleSmallDivisor<__uint128_t>();
-  auto double_array = std::vector<double>;
+  auto double_array = std::vector<double>();
   for (auto& pair : values) {
     double_array.push_back((double)pair.first);
   }
@@ -250,7 +250,7 @@ BENCHMARK(BM_FloatingPointAggregatorUpdate);
 
 void BM_FloatingPointAggregatorGetVariance(benchmark::State& state) {
   auto values = GetRandomIntrinsic128SampleSmallDivisor<__uint128_t>();
-  auto double_array = std::vector<double>;
+  auto double_array = std::vector<double>();
   for (auto& pair : values) {
     double_array.push_back((double)pair.first);
   }
