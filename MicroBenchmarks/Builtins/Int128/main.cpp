@@ -240,9 +240,8 @@ void BM_FloatingPointAggregatorUpdate(benchmark::State& state) {
   }
   size_t i = 0;
   fp_variance<double> aggregator;
-  for (auto )
   for (const auto _ : state) {
-    aggregator.on_trade(double_array[i]);
+    aggregator.on_update(double_array[i]);
     i = (i + 1) % kSampleSize;
   }
   benchmark::DoNotOptimize(aggregator.get_variance());
@@ -258,7 +257,7 @@ void BM_FloatingPointAggregatorGetVariance(benchmark::State& state) {
   size_t i = 0;
   fp_variance<double> aggregator;
   for (const auto _ : state) {
-    aggregator.on_trade(double_array[i]);
+    aggregator.on_update(double_array[i]);
     benchmark::DoNotOptimize(aggregator.get_variance());
     i = (i + 1) % kSampleSize;
   }
