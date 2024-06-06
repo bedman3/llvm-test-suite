@@ -251,14 +251,13 @@ BENCHMARK(BM_FloatingPointAggregatorUpdate);
 void BM_FloatingPointAggregatorGetVariance(benchmark::State& state) {
   auto values = GetRandomIntrinsic128SampleSmallDivisor<__uint128_t>();
   auto double_array = std::vector<double>();
+  fp_variance<double> aggregator;
   for (auto& pair : values) {
     double_array.push_back((double)pair.first);
     aggregator.on_update((double)pair.first);
   }
   size_t i = 0;
-  fp_variance<double> aggregator;
   for (const auto _ : state) {
-    
     benchmark::DoNotOptimize(aggregator.get_variance());
     i = (i + 1) % kSampleSize;
   }
