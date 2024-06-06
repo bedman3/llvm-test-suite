@@ -170,7 +170,7 @@ template <typename T>
 void BM_IntegerAggregatorUpdate(benchmark::State& state) {
   auto values = GetRandomIntrinsic128SampleSmallDivisor<T>();
   size_t i = 0;
-  integer_trade_size_variance aggregator;
+  integer_trade_size_variance<uint64_t, T> aggregator;
   for (const auto _ : state) {
     benchmark::DoNotOptimize(aggregator.on_trade_update(values[i].second));
     i = (i + 1) % kSampleSize;
