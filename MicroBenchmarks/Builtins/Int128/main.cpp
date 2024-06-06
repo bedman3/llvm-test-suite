@@ -49,6 +49,46 @@ public:
     }
 };
 
+template <typename FloatT>
+class fp_variance {
+    uint64_t _input_count;
+    FloatT _mean;
+    FloatT _second_order_stats;
+public:
+    fp_variance() {
+        reset();
+    }
+
+    void reset() {
+        _input_count = 0;
+        _mean = 0;
+        _second_order_stats = 0;
+    }
+
+    void on_update(FloatT val) {
+        ++_input_count;
+        FloatT delta = val - _mean;
+        _mean += delta / _input_count;
+        FloatT delta_2 = val - _mean;
+        _second_order_stats += delta * delta_2;
+    }
+
+    void on_expire(FloatT val) {
+        if (_input_count == 1) {
+            reset();
+        }
+        --_input_count;
+        FloatT delta = val - _mean;
+        _mean -= delta / _input_count;
+        FloatT delta_2 = val - _mean;
+        _second_order_stats -= delta * delta_2;
+    }
+
+    FloatT get_variance() {
+        return _second_order_stats / _input_count;   
+    }
+};
+
 #include "benchmark/benchmark.h"
 
 #if defined(__SIZEOF_INT128__)
@@ -191,6 +231,39 @@ void BM_IntegerAggregatorGetVariance(benchmark::State& state) {
   }
 }
 BENCHMARK_TEMPLATE(BM_IntegerAggregatorGetVariance, __uint128_t);
+
+void BM_FloatingPointAggregatorUpdate(benchmark::State& state) {
+  auto values = GetRandomIntrinsic128SampleSmallDivisor<__uint128_t>();
+  auto double_array = std::vector<double>;
+  for (auto& pair : values) {
+    double_array.push_back((double)pair.first);
+  }
+  size_t i = 0;
+  fp_variance<double> aggregator;
+  for (auto )
+  for (const auto _ : state) {
+    aggregator.on_trade(double_array[i]);
+    i = (i + 1) % kSampleSize;
+  }
+  benchmark::DoNotOptimize(aggregator.get_variance());
+}
+BENCHMARK(BM_FloatingPointAggregatorUpdate);
+
+void BM_FloatingPointAggregatorGetVariance(benchmark::State& state) {
+  auto values = GetRandomIntrinsic128SampleSmallDivisor<__uint128_t>();
+  auto double_array = std::vector<double>;
+  for (auto& pair : values) {
+    double_array.push_back((double)pair.first);
+  }
+  size_t i = 0;
+  fp_variance<double> aggregator;
+  for (const auto _ : state) {
+    aggregator.on_trade(double_array[i]);
+    benchmark::DoNotOptimize(aggregator.get_variance());
+    i = (i + 1) % kSampleSize;
+  }
+}
+BENCHMARK(BM_FloatingPointAggregatorGetVariance);
 
 template <typename T>
 void BM_BaseCase(benchmark::State& state) {
