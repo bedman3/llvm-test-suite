@@ -8,10 +8,10 @@
 
 template <typename IntT = uint64_t, typename IntSqT = __uint128_t>
 class integer_trade_size_variance {
+public:
     IntT _sum_trade_size;
     IntT _trade_count;
     IntSqT _sum_sq_trade_size;
-public:
     integer_trade_size_variance() {
         reset();
     }
@@ -213,6 +213,9 @@ void BM_IntegerAggregatorUpdate(benchmark::State& state) {
   integer_trade_size_variance<uint64_t, T> aggregator;
   for (const auto _ : state) {
     aggregator.on_trade_update(values[i].second);
+    benchmark::DoNotOptimize(aggregator._sum_trade_size);
+    benchmark::DoNotOptimize(aggregator._trade_count);
+    benchmark::DoNotOptimize(aggregator._sum_sq_trade_size);
     i = (i + 1) % kSampleSize;
   }
   benchmark::DoNotOptimize(aggregator.get_variance());
