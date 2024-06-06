@@ -5,6 +5,51 @@
 #include <type_traits>
 #include <vector>
 
+
+template <typename IntT = uint64_t, typename IntSqT = __uint128_t>
+class integer_trade_size_variance {
+    IntT _sum_trade_size;
+    IntT _trade_count;
+    IntSqT _sum_sq_trade_size;
+public:
+    integer_trade_size_variance() {
+        reset();
+    }
+
+    void reset() {
+        _sum_trade_size = 0;
+        _trade_count = 0;
+        _sum_sq_trade_size = 0;
+    }
+
+    void on_trade_update(IntT trade_size) {
+        _sum_trade_size += trade_size;
+        IntSqT ts = trade_size;
+        _sum_sq_trade_size += ts * ts;
+        ++_trade_count;
+    }
+
+    double get_variance() {
+        if (_trade_count == 0) {
+            return std::numeric_limits<double>::quiet_NaN();
+        }
+        double trade_count_d = _trade_count;
+        IntSqT sum_pow_2 = _sum_trade_size;
+        sum_pow_2 *= sum_pow_2;
+        std::div(sum_pow_2, _trade_count);
+        IntSqT sum_pow_2_whole = (sum_pow_2 / _trade_count);
+        double sum_pow_2_decimal = (sum_pow_2 - sum_pow_2_whole * _trade_count) / trade_count_d;
+        return (_sum_sq_trade_size - sum_pow_2_whole - sum_pow_2_decimal) / trade_count_d;
+    }
+
+    void on_trade_expire(IntT trade_size) {
+        _sum_trade_size -= trade_size;
+        IntSqT ts = trade_size;
+        _sum_sq_trade_size -= ts * ts;
+        --_trade_count;
+    }
+};
+
 #include "benchmark/benchmark.h"
 
 #if defined(__SIZEOF_INT128__)
@@ -110,7 +155,46 @@ void BM_RemainderIntrinsic128SmallDivisor(benchmark::State& state) {
 BENCHMARK_TEMPLATE(BM_RemainderIntrinsic128SmallDivisor, __uint128_t);
 BENCHMARK_TEMPLATE(BM_RemainderIntrinsic128SmallDivisor, __int128_t);
 
-}  // namespace
+template <typename T>
+void BM_128IntegerToDOubleConversion(benchmark::State& state) {
+  auto values = GetRandomIntrinsic128SampleSmallDivisor<T>();
+  size_t i = 0;
+  for (const auto _ : state) {
+    benchmark::DoNotOptimize((double)values[i].first);
+    i = (i + 1) % kSampleSize;
+  }
+}
+BENCHMARK_TEMPLATE(BM_128IntegerToDOubleConversion, __uint128_t);
+BENCHMARK_TEMPLATE(BM_128IntegerToDOubleConversion, __int128_t);
+
+template <typename T>
+void BM_IntegerAggregatorUpdate(benchmark::State& state) {
+  auto values = GetRandomIntrinsic128SampleSmallDivisor<T>();
+  size_t i = 0;
+  integer_trade_size_variance aggregator;
+  for (const auto _ : state) {
+    benchmark::DoNotOptimize(aggregator.on_trade_update(values.second));
+    i = (i + 1) % kSampleSize;
+  }
+}
+BENCHMARK_TEMPLATE(BM_IntegerAggregatorUpdate, __uint128_t);
+
+template <typename T>
+void BM_IntegerAggregatorGetVariance(benchmark::State& state) {
+  auto values = GetRandomIntrinsic128SampleSmallDivisor<T>();
+  size_t i = 0;
+  integer_trade_size_variance<uint64_t, T> aggregator;
+  for (const auto _ : state) {
+    aggregator.on_trade_update(values.second);
+    benchmark::DoNotOptimize(aggregator.get_variance());
+    i = (i + 1) % kSampleSize;
+  }
+}
+BENCHMARK_TEMPLATE(BM_IntegerAggregatorGetVariance, __uint128_t);
+
+}
+
+// namespace
 
 #endif
 
